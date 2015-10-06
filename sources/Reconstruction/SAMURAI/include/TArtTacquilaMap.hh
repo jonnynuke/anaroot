@@ -53,12 +53,12 @@ class TArtTacquilaMap : public TNamed {
   }
 
   virtual char * GetMapInfo(){ return mapinfo; }
-  friend ostream & operator << (ostream& out, const TArtTacquilaMap& p) {
+  friend std::ostream & operator << (std::ostream& out, const TArtTacquilaMap& p) {
     out << "Detector Sam, Gtb, Mod, Ch: " 
 	<< p.sam << " " 
 	<< p.gtb << " " 
 	<< p.mod << " " 
-	<< p.ch << endl;
+	<< p.ch << std::endl;
     return out;
   }
 

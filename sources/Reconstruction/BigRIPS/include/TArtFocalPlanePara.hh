@@ -23,6 +23,7 @@ class TArtFocalPlanePara : public TNamed {
     out << "Z position: " << p.zpos << ", ";
     out << "Focus pos offset: " << p.zpos_offset;
     out << std::endl;
+    return out;
   }
 
  private:
