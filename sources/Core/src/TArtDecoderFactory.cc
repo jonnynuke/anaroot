@@ -34,6 +34,7 @@
 #include "TArtDecoderNeulandTS.hh"
 #include "TArtDecoderBigEndianV7XX.hh"
 #include "TArtDecoderTacquila.hh"
+#include "TArtDecoderVmeEasyroc.hh"
 
 #if USE_MINOS
 #include "TArtDecoderFeminos.hh"
@@ -76,6 +77,7 @@ void TArtDecoderFactory::Register()
    Register(TArtDecoderNeulandTS::Instance());
    Register(TArtDecoderBigEndianV7XX::Instance());
    Register(TArtDecoderTacquila::Instance());
+   Register(TArtDecoderVmeEasyroc::Instance());
 
 #if USE_MINOS
    Register(TArtDecoderFeminos::Instance());

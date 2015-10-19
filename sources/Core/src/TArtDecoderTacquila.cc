@@ -54,7 +54,7 @@ int TArtDecoderTacquila::Decode(unsigned char* &buf,
       module[0] = (evtdata[i]&0xf8000000) >> 27;
       ch    [0] = (evtdata[i]&0x07c00000) >> 22;
       isadc [0] = (evtdata[i]&0x00200000) >> 21;
-      cycle [0] = 63 - (evtdata[i]&0x000ff000) >> 12;
+      cycle [0] = 63 - ((evtdata[i]&0x000ff000) >> 12);
       val   [0] = 4095 - (evtdata[i]&0x00000fff); // supposed to be tdc
 
       i ++;
