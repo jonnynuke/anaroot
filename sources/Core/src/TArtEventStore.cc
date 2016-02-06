@@ -39,18 +39,30 @@ TArtEventStore::TArtEventStore()
    rawevent->SetName("RawEvent");
    sman->AddDataContainer(rawevent);
 
+   runinfo_array = new TClonesArray("TArtRunInfo",1);
+   runinfo_array->SetName("RunInfo");
+   sman->AddDataContainer(runinfo_array);
+   new ((*runinfo_array)[0]) TArtRunInfo();
+
    info_array = new TClonesArray("TArtEventInfo",10);
    info_array->SetName("EventInfo");
    sman->AddDataContainer(info_array);
    new ((*info_array)[0]) TArtEventInfo();
+
+
 }
 
 TArtEventStore::~TArtEventStore()
 {
   sman->RemoveDataContainer("RawEvent");
   if(rawevent){ delete rawevent; rawevent=NULL; }
+
+  sman->RemoveDataContainer("RunInfo");
+  if(runinfo_array){ delete runinfo_array; runinfo_array=NULL; }
+
   sman->RemoveDataContainer("EventInfo");
   if(info_array){ delete info_array; info_array=NULL; }
+
   if(fDataSource){ delete fDataSource; fDataSource=NULL; }
   if(fParser){ delete fParser; fParser=NULL; }
 }
@@ -124,6 +136,7 @@ bool TArtEventStore::GetNextEvent()
   if(fDataSource->GetFileStatus() == kNOTEXIST)
     return false;
 
+  // run info will not be cleared. 
   TArtEventInfo *ei = (TArtEventInfo *)info_array->At(0);
   ei->Clear();
   rawevent->Clear();

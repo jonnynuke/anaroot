@@ -10,6 +10,8 @@
  */
 
 #include "TArtFileDataSource.hh"
+#include "TArtStoreManager.hh"
+#include "TArtRunInfo.hh"
 #include "TArtCore.hh"
 #include <string.h>
 #include <stdlib.h>
@@ -96,6 +98,19 @@ bool TArtFileDataSource::FileOpen(const char* sourceName)
 	TArtCore::Info("TArtFileDataSource","Ender      = %s", info.ender);
 	  
 	fRunNumber = strtol(info.runnumber, NULL, 10);
+
+	TArtStoreManager *sman = TArtStoreManager::Instance();
+	TClonesArray * runinfo_array = (TClonesArray *)sman->FindDataContainer("RunInfo");
+
+	TArtRunInfo *ri = (TArtRunInfo *)runinfo_array->At(0);
+	ri->SetRunName(info.runname);
+	ri->SetRunNumber(info.runnumber);
+	ri->SetStartTime(start);
+	ri->SetStopTime(stop);
+	ri->SetDate(info.date);
+	ri->SetHeader(info.header);
+	ri->SetEnder(info.ender);
+
       }
     }
 

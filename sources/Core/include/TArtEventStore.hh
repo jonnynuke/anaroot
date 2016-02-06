@@ -17,6 +17,7 @@
 #include <fstream>
 #include "TArtParser.hh"
 #include "TArtDataSource.hh"
+#include "TArtRunInfo.hh"
 #include "TArtRawEventObject.hh"
 #include "TArtStoreManager.hh"
 
@@ -44,12 +45,14 @@ class TArtEventStore {
   void SkipEvent(int neve); // function to skip events
   TArtRawEventObject * GetRawEventObject(){return rawevent;}
   TClonesArray * GetEventInfoArray(){return info_array;}
+  TArtRunInfo * GetRunInfo(){return (TArtRunInfo*)runinfo_array->At(0);}
   void SetObjectPointer(TArtRawEventObject *raweve){rawevent = raweve;}
 
  private:
   TArtDataSource   *fDataSource;
   TArtParser       *fParser;
   TClonesArray     *info_array;
+  TClonesArray     *runinfo_array;
   TArtRawEventObject *rawevent;
   bool *pInterrupt;
   char *fMapFileName;

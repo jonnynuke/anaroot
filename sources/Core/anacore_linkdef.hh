@@ -51,6 +51,7 @@
 #pragma link C++ class TArtRawSegmentObject+;
 #pragma link C++ class TArtRawScalerObject+;
 #pragma link C++ class TArtRawEventObject+; 
+#pragma link C++ class TArtRunInfo+; 
 #pragma link C++ class TArtEventInfo+; 
 #pragma link C++ class TArtSharedMemory-!;
 #pragma link C++ class TArtSharedMemoryDataSource-!;
