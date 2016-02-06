@@ -32,7 +32,8 @@ void TAlEncSAMURAIPlaExample::Construct()
 {
   fStoreManager = TArtStoreManager::Instance();
   bigripsparameters = TArtBigRIPSParameters::Instance();
-  bigripsparameters->LoadParameter((char*)"db/BigRIPSPlastic.xml");
+  //  bigripsparameters->LoadParameter((char*)"db/BigRIPSPlastic.xml");
+  bigripsparameters->LoadParameter((char*)"db/SAMURAIPlastic.xml");
   //  bigripsparameters->PrintListOfPlasticPara();
   calibplastic = new TArtCalibPlastic; //must be called after parameter is constructed
 }
@@ -62,6 +63,22 @@ bool TAlEncSAMURAIPlaExample::Calculate()
   Double_t f3plad_dtslw = -9999;
   Double_t f3plad_q = -9999;
   Double_t f3plad_lnq = -9999;
+  Double_t f5pla_tl = -9999;
+  Double_t f5pla_tr = -9999;
+  Double_t f5pla_t = -9999;
+  Double_t f5pla_dt = -9999;
+  Double_t f5pla_dtcal = -9999;
+  Double_t f5pla_dtslw = -9999;
+  Double_t f5pla_q = -9999;
+  Double_t f5pla_lnq = -9999;
+  Double_t f5pla2_tl = -9999;
+  Double_t f5pla2_tr = -9999;
+  Double_t f5pla2_t = -9999;
+  Double_t f5pla2_dt = -9999;
+  Double_t f5pla2_dtcal = -9999;
+  Double_t f5pla2_dtslw = -9999;
+  Double_t f5pla2_q = -9999;
+  Double_t f5pla2_lnq = -9999;
   Double_t f7pla_tl = -9999;
   Double_t f7pla_tr = -9999;
   Double_t f7pla_t = -9999;
@@ -111,9 +128,9 @@ bool TAlEncSAMURAIPlaExample::Calculate()
   if(pla){
     f3pla_tl = pla->GetTLRaw();
     f3pla_tr = pla->GetTRRaw();
-    if(pla->GetTLRaw() < 4095 &&
+    if(pla->GetTLRaw() < /*4095*/2^16-1 &&
        pla->GetTLRaw() > 0 &&
-       pla->GetTRRaw() < 4095 &&
+       pla->GetTRRaw() < /*4095*/2^16-1 &&
        pla->GetTRRaw() > 0){
       f3pla_t = (f3pla_tl + f3pla_tr)/2.;
       f3pla_dt = f3pla_tl - f3pla_tr;
@@ -149,9 +166,9 @@ bool TAlEncSAMURAIPlaExample::Calculate()
   if(pla){
     f3plad_tl = pla->GetTLRaw();
     f3plad_tr = pla->GetTRRaw();
-    if(pla->GetTLRaw() < 4095 &&
+    if(pla->GetTLRaw() < /*4095*/2^16-1 &&
        pla->GetTLRaw() > 0 &&
-       pla->GetTRRaw() < 4095 &&
+       pla->GetTRRaw() < /*4095*/2^16-1 &&
        pla->GetTRRaw() > 0){
       f3plad_t = (f3plad_tl + f3plad_tr)/2.;
       f3plad_dt = f3plad_tl - f3plad_tr;
@@ -183,13 +200,54 @@ bool TAlEncSAMURAIPlaExample::Calculate()
     fAnaLoop->Add(SAMURAIPLA, TAveSlw,2, pla->GetTimeSlew());
     fAnaLoop->Add(SAMURAIPLA, DTSlw,  2, f3plad_dtslw);
   }
+
+  pla = calibplastic->FindPlastic((char*)"F5pl");
+  if(pla){
+    f5pla_tl = pla->GetTLRaw();
+    f5pla_tr = pla->GetTRRaw();
+    if(pla->GetTLRaw() < /*4095*/2^16-1 &&
+       pla->GetTLRaw() > 0 &&
+       pla->GetTRRaw() < /*4095*/2^16-1 &&
+       pla->GetTRRaw() > 0){
+      f5pla_t = (f5pla_tl + f5pla_tr)/2.;
+      f5pla_dt = f5pla_tl - f5pla_tr;
+      f5pla_dtcal = pla->GetTimeL() - pla->GetTimeR();
+      f5pla_dtslw = pla->GetTimeLSlew() - pla->GetTimeRSlew();
+    }
+    if(pla->GetQLRaw() > 0 &&
+       pla->GetQRRaw() > 0){
+      //      f5pla_q = pla->GetQLRaw() + pla->GetQRRaw();
+      f5pla_q = sqrt(pla->GetQLRaw() * pla->GetQRRaw());
+      f5pla_lnq = log((Double_t)pla->GetQLRaw()/pla->GetQRRaw());
+    }
+
+    fAnaLoop->Add(SAMURAIPLA, ID,     8, 8);
+    fAnaLoop->Add(SAMURAIPLA, QLRaw,  8, pla->GetQLRaw());
+    fAnaLoop->Add(SAMURAIPLA, QRRaw,  8, pla->GetQRRaw());
+    fAnaLoop->Add(SAMURAIPLA, QAveRaw,8, f5pla_q);  
+    fAnaLoop->Add(SAMURAIPLA, LogQRaw,8, f5pla_lnq);   
+    fAnaLoop->Add(SAMURAIPLA, TLRaw,  8, pla->GetTLRaw());
+    fAnaLoop->Add(SAMURAIPLA, TRRaw,  8, pla->GetTRRaw());
+    fAnaLoop->Add(SAMURAIPLA, TAveRaw,8, f5pla_t);
+    fAnaLoop->Add(SAMURAIPLA, DTRaw,  8, f5pla_dt); 
+    fAnaLoop->Add(SAMURAIPLA, TLCal,  8, pla->GetTimeL());
+    fAnaLoop->Add(SAMURAIPLA, TRCal,  8, pla->GetTimeR());
+    fAnaLoop->Add(SAMURAIPLA, TAveCal,8, pla->GetTime());
+    fAnaLoop->Add(SAMURAIPLA, DTCal,  8, f5pla_dtcal);
+    fAnaLoop->Add(SAMURAIPLA, TLSlw,  8, pla->GetTimeLSlew());
+    fAnaLoop->Add(SAMURAIPLA, TRSlw,  8, pla->GetTimeRSlew());
+    fAnaLoop->Add(SAMURAIPLA, TAveSlw,8, pla->GetTimeSlew());
+    fAnaLoop->Add(SAMURAIPLA, DTSlw,  8, f5pla_dtslw);
+  }
+
+
   pla = calibplastic->FindPlastic((char*)"F7pl");
   if(pla){
     f7pla_tl = pla->GetTLRaw();
     f7pla_tr = pla->GetTRRaw();
-    if(pla->GetTLRaw() < 4095 &&
+    if(pla->GetTLRaw() < /*4095*/2^16-1 &&
        pla->GetTLRaw() > 0 &&
-       pla->GetTRRaw() < 4095 &&
+       pla->GetTRRaw() < /*4095*/2^16-1 &&
        pla->GetTRRaw() > 0){
       f7pla_t = (f7pla_tl + f7pla_tr)/2.;
       f7pla_dt = f7pla_tl - f7pla_tr;
@@ -225,9 +283,9 @@ bool TAlEncSAMURAIPlaExample::Calculate()
   if(pla){
     f13pla1_tl = pla->GetTLRaw();
     f13pla1_tr = pla->GetTRRaw();
-    if(pla->GetTLRaw() < 4095 &&
+    if(pla->GetTLRaw() < /*4095*/2^16-1 &&
        pla->GetTLRaw() > 0 &&
-       pla->GetTRRaw() < 4095 &&
+       pla->GetTRRaw() < /*4095*/2^16-1 &&
        pla->GetTRRaw() > 0){
       f13pla1_t = (f13pla1_tl + f13pla1_tr)/2.;
       f13pla1_dt = f13pla1_tl - f13pla1_tr;
@@ -263,9 +321,9 @@ bool TAlEncSAMURAIPlaExample::Calculate()
   if(pla){
     f13pla2_tl = pla->GetTLRaw();
     f13pla2_tr = pla->GetTRRaw();
-    if(pla->GetTLRaw() < 4095 &&
+    if(pla->GetTLRaw() < /*4095*/2^16-1 &&
        pla->GetTLRaw() > 0 &&
-       pla->GetTRRaw() < 4095 &&
+       pla->GetTRRaw() < /*4095*/2^16-1 &&
        pla->GetTRRaw() > 0){
       f13pla2_t = (f13pla2_tl + f13pla2_tr)/2.;
       f13pla2_dt = f13pla2_tl - f13pla2_tr;
@@ -297,13 +355,13 @@ bool TAlEncSAMURAIPlaExample::Calculate()
     fAnaLoop->Add(SAMURAIPLA, TAveSlw,5, pla->GetTimeSlew());
     fAnaLoop->Add(SAMURAIPLA, DTSlw,  5, f13pla2_dtslw);
   }
-  pla = calibplastic->FindPlastic((char*)"SBV");
+  pla = calibplastic->FindPlastic((char*)"SBV1");
   if(pla){
     f13sbv_tl = pla->GetTLRaw();
     f13sbv_tr = pla->GetTRRaw();
-    if(pla->GetTLRaw() < 4095 &&
+    if(pla->GetTLRaw() < /*4095*/2^16-1 &&
        pla->GetTLRaw() > 0 &&
-       pla->GetTRRaw() < 4095 &&
+       pla->GetTRRaw() < /*4095*/2^16-1 &&
        pla->GetTRRaw() > 0){
       f13sbv_t = (f13sbv_tl + f13sbv_tr)/2.;
       f13sbv_dt = f13sbv_tl - f13sbv_tr;
@@ -335,13 +393,51 @@ bool TAlEncSAMURAIPlaExample::Calculate()
     fAnaLoop->Add(SAMURAIPLA, TAveSlw,6, pla->GetTimeSlew());
     fAnaLoop->Add(SAMURAIPLA, DTSlw,  6, f13sbv_dtslw);
   }
+  pla = calibplastic->FindPlastic((char*)"SBV2");
+  if(pla){
+    f13sbv_tl = pla->GetTLRaw();
+    f13sbv_tr = pla->GetTRRaw();
+    if(pla->GetTLRaw() < /*4095*/2^16-1 &&
+       pla->GetTLRaw() > 0 &&
+       pla->GetTRRaw() < /*4095*/2^16-1 &&
+       pla->GetTRRaw() > 0){
+      f13sbv_t = (f13sbv_tl + f13sbv_tr)/2.;
+      f13sbv_dt = f13sbv_tl - f13sbv_tr;
+      f13sbv_dtcal = pla->GetTimeL() - pla->GetTimeR();
+      f13sbv_dtslw = pla->GetTimeLSlew() - pla->GetTimeRSlew();
+    }
+    if(pla->GetQLRaw() > 0 &&
+       pla->GetQRRaw() > 0){
+      //      f13sbv_q = pla->GetQLRaw() + pla->GetQRRaw();
+      f13sbv_q = sqrt(pla->GetQLRaw() * pla->GetQRRaw());
+      f13sbv_lnq = log((Double_t)pla->GetQLRaw()/pla->GetQRRaw());
+    }
+
+    fAnaLoop->Add(SAMURAIPLA, ID,     9, 9);
+    fAnaLoop->Add(SAMURAIPLA, QLRaw,  9, pla->GetQLRaw());
+    fAnaLoop->Add(SAMURAIPLA, QRRaw,  9, pla->GetQRRaw());
+    fAnaLoop->Add(SAMURAIPLA, QAveRaw,9, f13sbv_q);  
+    fAnaLoop->Add(SAMURAIPLA, LogQRaw,9, f13sbv_lnq);   
+    fAnaLoop->Add(SAMURAIPLA, TLRaw,  9, pla->GetTLRaw());
+    fAnaLoop->Add(SAMURAIPLA, TRRaw,  9, pla->GetTRRaw());
+    fAnaLoop->Add(SAMURAIPLA, TAveRaw,9, f13sbv_t);
+    fAnaLoop->Add(SAMURAIPLA, DTRaw,  9, f13sbv_dt); 
+    fAnaLoop->Add(SAMURAIPLA, TLCal,  9, pla->GetTimeL());
+    fAnaLoop->Add(SAMURAIPLA, TRCal,  9, pla->GetTimeR());
+    fAnaLoop->Add(SAMURAIPLA, TAveCal,9, pla->GetTime());
+    fAnaLoop->Add(SAMURAIPLA, DTCal,  9, f13sbv_dtcal);
+    fAnaLoop->Add(SAMURAIPLA, TLSlw,  9, pla->GetTimeLSlew());
+    fAnaLoop->Add(SAMURAIPLA, TRSlw,  9, pla->GetTimeRSlew());
+    fAnaLoop->Add(SAMURAIPLA, TAveSlw,9, pla->GetTimeSlew());
+    fAnaLoop->Add(SAMURAIPLA, DTSlw,  9, f13sbv_dtslw);
+  }
   pla = calibplastic->FindPlastic((char*)"F7pl-2");
   if(pla){
     f7pla2_tl = pla->GetTLRaw();
     f7pla2_tr = pla->GetTRRaw();
-    if(pla->GetTLRaw() < 4095 &&
+    if(pla->GetTLRaw() < /*4095*/2^16-1 &&
        pla->GetTLRaw() > 0 &&
-       pla->GetTRRaw() < 4095 &&
+       pla->GetTRRaw() < /*4095*/2^16-1 &&
        pla->GetTRRaw() > 0){
       f7pla2_t = (f7pla2_tl + f7pla2_tr)/2.;
       f7pla2_dt = f7pla2_tl - f7pla2_tr;

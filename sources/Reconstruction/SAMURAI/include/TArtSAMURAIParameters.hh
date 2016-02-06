@@ -42,6 +42,8 @@ public:
   static void Delete();
 
   Bool_t LoadParameter(const char *xmlfile);
+  Bool_t LoadNeuLANDTCal(const char *csvfile);
+  Bool_t LoadTCal(const char *cfile){return LoadNeuLANDTCal(cfile);}
 
   void PrintListOfHODPlaPara ();
   void PrintListOfRPTOFPlaPara ();
@@ -54,7 +56,8 @@ public:
   void PrintListOfRPDCHitPara();
   void PrintListOfNEBULAPlaPara() const;
   void PrintListOfNeuLANDPlaPara() const;
-  void PrintListOfTacquilaPara() const;
+  void PrintListOfNeuLANDVETOPlaPara() const;
+  //  void PrintListOfTacquilaPara() const;
 
   TList* GetListOfHODPlaPara () {return listOfHODPlaPara; }
   TList* GetListOfRPTOFPlaPara () {return listOfRPTOFPlaPara; }
@@ -88,6 +91,9 @@ public:
 
   const TArtTacquilaPara* FindTacquilaPara(const TArtTacquilaMap *rmap) const;
   const TArtTacquilaPara* FindTacquilaPara(Int_t id) const;//find by id
+  const TArtNEBULAPlaPara* FindNeuLANDVETOPlaUPara(const TArtRIDFMap &rmap) const;
+  const TArtNEBULAPlaPara* FindNeuLANDVETOPlaDPara(const TArtRIDFMap &rmap) const;
+  const TArtNEBULAPlaPara* FindNeuLANDVETOPlaPara(Int_t id) const;//find by id
 
 private:
   void ParseParaList(TXMLNode* node);
@@ -99,6 +105,7 @@ private:
   TArtNEBULAHPCPara* ParseNEBULAHPCPara(TXMLNode* node);
   TArtNeuLANDPlaPara* ParseNeuLANDPlaPara(TXMLNode* node);
   TArtTacquilaPara*  ParseTacquilaPara(TXMLNode* node);
+  TArtNEBULAPlaPara* ParseNeuLANDVETOPlaPara(TXMLNode* node);
 
   std::map<TArtRIDFMap, TArtHODPlaPara *> hod_pmap;
   std::map<TArtRIDFMap, TArtRPTOFPlaPara *> rptof_pmap;
@@ -114,6 +121,7 @@ private:
   TArtNEBULAHPCParaMap  *fNEBULAHPCParaMap;
   TArtNeuLANDPlaParaMap *fNeuLANDPlaParaMap;
   TArtTacquilaParaMap   *fTacquilaParaMap;
+  TArtNEBULAPlaParaMap  *fNeuLANDVETOPlaUParaMap, *fNeuLANDVETOPlaDParaMap;
 
   // list of parameters 
   TList *listOfHODPlaPara;
@@ -131,6 +139,7 @@ private:
   std::map<int, TArtNEBULAHPCPara*> fIDNEBULAHPCParaMap;
   std::map<int, TArtNeuLANDPlaPara*> fIDNeuLANDPlaParaMap;
   std::map<int, TArtTacquilaPara*> fIDTacquilaParaMap;
+  std::map<int, TArtNEBULAPlaPara*> fIDNeuLANDVETOPlaParaMap;
 
   TArtStoreManager* fStoreManager;
   static TArtSAMURAIParameters* fSAMURAIParameters;

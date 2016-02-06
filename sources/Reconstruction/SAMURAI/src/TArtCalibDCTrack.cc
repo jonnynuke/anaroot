@@ -87,7 +87,7 @@ void TArtCalibDCTrack::ClearData()   {
   for(Int_t i=0;i<nlayer_u;i++) hits_buffer_u[i].clear();
   for(Int_t i=0;i<nlayer_v;i++) hits_buffer_v[i].clear();
 
-  fDCTrackArray->Clear();
+  fDCTrackArray->Clear("C");
   fReconstructed = false;
   return;
 }
@@ -466,10 +466,10 @@ void TArtCalibDCTrack::RecoTrack() {
   //   for(Int_t i=0; i<= ntrv; i++) 
   //     if(tracks_v[i]) delete tracks_v[i];
 
-  tracks_x.Delete();
-  tracks_y.Delete();
-  tracks_u.Delete();
-  tracks_v.Delete();
+   tracks_x.Delete();
+   tracks_y.Delete();
+   tracks_u.Delete();
+   tracks_v.Delete();
 
   return;
 }
@@ -613,6 +613,7 @@ TArtCalibDCTrack::Track1D * TArtCalibDCTrack::CalcTrack1D(std::vector <TArtDCHit
   delete [] xpos;
   delete [] zpos;
   delete [] lid;
+  delete [] plid;
 
   /*
   TArtCore::Info(__FILE__,"x:%f a:%f chi2:%f ndf:%d",tr.x,tr.a,tr.chi2,tr.ndf);

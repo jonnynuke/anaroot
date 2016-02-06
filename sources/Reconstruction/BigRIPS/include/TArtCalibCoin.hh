@@ -17,7 +17,7 @@ class TArtCalibCoin : public TArtReconstruction {
   virtual ~TArtCalibCoin();
   virtual void LoadData();
   virtual void LoadData(TArtRawSegmentObject *seg);
-  virtual void ReconstructData(){}
+  virtual void ReconstructData(){LoadData();}
   virtual void ClearData();
 
   virtual bool IsChTrue(Int_t id);

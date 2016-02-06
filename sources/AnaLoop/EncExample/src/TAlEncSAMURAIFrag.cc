@@ -52,6 +52,7 @@ bool TAlEncSAMURAIFrag::Calculate()
       //      std::cout << frag->GetAoQ()<< " " << frag->GetZ() << std::endl;
     
       fAnaLoop->Add(SAMURAIPID,ID,        1+i,1+i);
+      fAnaLoop->Add(SAMURAIPID,BRHO,      1+i,frag->GetBrho());
       fAnaLoop->Add(SAMURAIPID,BETA,      1+i,frag->GetBeta());
       fAnaLoop->Add(SAMURAIPID,AOQ,       1+i,frag->GetAoQ());
       fAnaLoop->Add(SAMURAIPID,Z,         1+i,frag->GetZ());

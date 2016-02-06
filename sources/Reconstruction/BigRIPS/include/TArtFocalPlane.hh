@@ -10,7 +10,7 @@ class TArtFocalPlane : public TArtDataObject {
  public: 
   TArtFocalPlane(){opt_vector.ResizeTo(5);zpos=0;zpos_offset=0;Clear();}
   virtual ~TArtFocalPlane(){}
-  virtual void Clear(){nfired_ppacx=-1;nfired_ppacy=-1;X=-9999;Y=-9999;A=-9999;B=-9999;SetDataState(0);}
+  virtual void Clear(){for(int i=0;i<4;i++)opt_vector[i]=-9999.;nfired_ppacx=-1;nfired_ppacy=-1;X=-9999;Y=-9999;A=-9999;B=-9999;SetDataState(0);}
 
   virtual void SetStdZpos(Double_t val){zpos = val;}
   virtual void SetZoffset(Double_t val){zpos_offset = val;}

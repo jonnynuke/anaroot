@@ -135,8 +135,8 @@ void TArtCalibDALI::ReconstructData()   { // call after the raw data are loaded
     Int_t tdc = nai->GetRawTDC();
     Double_t theta = nai->GetTheta();
     Double_t costheta = TMath::Cos(theta*TMath::Pi()/180.);
-    Double_t fEnergy = (adc - para->GetQPed()) * para->GetQCal();
-    //    Double_t fEnergy = adc * para->GetQCal() + para->GetQPed();
+    //Double_t fEnergy = (adc - para->GetQPed()) * para->GetQCal();
+    Double_t fEnergy = adc * para->GetQCal() + para->GetQPed();
     nai->SetEnergy(fEnergy);
     nai->SetCosTheta(costheta);
 

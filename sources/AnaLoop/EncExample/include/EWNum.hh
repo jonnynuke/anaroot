@@ -1,4 +1,3 @@
-
 #ifndef EWNUM_HH
 #define EWNUM_HH
 
@@ -316,7 +315,7 @@ namespace WNum{
 
   namespace SAMURAIPLA{
     enum {
-      // ID 1:F3pl, 2:F3pl-40nsec, 3:F7pl, 4:F13pl-1, 5:F13pl-2, 6:SBV, 7:F7pl2,
+      // ID 1:F3pl, 2:F3pl-40nsec, 3:F7pl, 4:F13pl-1, 5:F13pl-2, 6:SBV1, 7:F7pl2, 8:F5pl, 9:SBV2
       ID = 1,     //1
 
       QLRaw = 10, //10
@@ -485,6 +484,78 @@ namespace WNum{
     };
   }
 
+  namespace NEULAND{
+    enum {
+      // ID 1-400:neutron 
+      // ID 401-408:veto 
+      // ID 409: time ref
+      // note: U/D stand for side1/side2 
+      ID=1,           //1
+      Layer,          //2
+      SubLayer,       //3
+      DetPosX,        //4
+      DetPosY,        //5
+      DetPosZ,        //6
+      Hit,            //7 True if both end fired
+
+      QURaw=10,       //10
+      QDRaw,          //11
+      //QUPed,        //12 N/A
+      //QDPed,        //13 N/A
+      QUCal=14,       //14
+      QDCal,          //15
+      //QAvePed,      //16 N/A
+      QAveCal=17,     //17
+      //LogQPed,      //18 N/A
+      LogQCal=19,     //19 *100
+      //IvSqrtQUPed,  //20 N/A
+      //IvSqrtQDPed,  //21 N/A
+      //IvSqrtQAvePed,//22 N/A
+
+      TURaw=30,      //30
+      TDRaw,         //31
+      //TUCal,       //32 N/A
+      //TDCal,       //33 N/A
+      TUSlw=34,      //34
+      TDSlw,         //35
+      DTRaw,         //36
+      //DTCal,       //37 N/A
+      DTSlw=38,      //38
+      TAveRaw,       //39
+      //TAveCal,     //40 N/A
+      TAveSlw=41,    //41
+      //TUCalT0,     //42 N/A
+      //TDCalT0,     //43 N/A
+      //TUSlwT0,     //44 N/A
+      //TDSlwT0,     //45 N/A
+      //TAveCalT0,   //46 N/A
+      //TAveSlwT0,   //47 N/A
+      //TTOFGamma,   //48 N/A
+      //TTOFNeutron, //49 N/A
+
+      //PosCal=50,   //50 N/A
+      PosSlw=51,     //51
+
+      PosX=60,       //60
+      PosY,          //61
+      PosZ,          //62
+      //FlightLength,//63 N/A
+
+
+      // ID 0
+      Multiplicity_N  =100, // Total neutron
+      Multiplicity_N11=101, // Neut Wall 1, Layer 1
+      Multiplicity_N12=102, // Neut Wall 1, Layer 2
+      Multiplicity_N21=103, // Neut Wall 2, Layer 1
+      Multiplicity_N22=104, // Neut Wall 2, Layer 2
+      Multiplicity_N31=105, // Neut Wall 3, Layer 1
+      Multiplicity_N32=106, // Neut Wall 3, Layer 2
+      Multiplicity_N41=107, // Neut Wall 4, Layer 1
+      Multiplicity_N42=108, // Neut Wall 4, Layer 2
+      Multiplicity_V  =109  // Total veto 
+
+    };
+  }
   namespace SAMURAITZero{
     enum {
       // ID 1
@@ -665,10 +736,11 @@ namespace WNum{
       // ID 1-96: ASIC number
       ID =  1,
       Fec=  2,
-      Qmax= 3, // For Qmax channel within an ASIC
-      Xpos=10, // For Qmax channel within an ASIC
-      Ypos=12, // For Qmax channel within an ASIC
-      Time=31, // For Qmax channel within an ASIC
+      Qmax= 3,  // For Qmax channel within an ASIC
+      Xpos=10,  // For Qmax channel within an ASIC
+      Ypos=12,  // For Qmax channel within an ASIC
+      Time=31,  // For Qmax channel within an ASIC
+      MaxCh=41, // For Qmax channel within an ASIC
 
       // this values are reset every ?? event
       ID_sample=51, // (TODO) Usefull ?

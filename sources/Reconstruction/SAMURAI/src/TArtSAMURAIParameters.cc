@@ -56,6 +56,8 @@ TArtSAMURAIParameters::TArtSAMURAIParameters(const char* name, const char* title
   fNEBULAHPCParaMap  = new TArtNEBULAHPCParaMap;
   fNeuLANDPlaParaMap = new TArtNeuLANDPlaParaMap;
   fTacquilaParaMap   = new TArtTacquilaParaMap;
+  fNeuLANDVETOPlaUParaMap = new TArtNEBULAPlaParaMap;
+  fNeuLANDVETOPlaDParaMap = new TArtNEBULAPlaParaMap;
 
   fStoreManager = TArtStoreManager::Instance();
   fStoreManager->AddParameters(this);
@@ -130,6 +132,19 @@ TArtSAMURAIParameters::~TArtSAMURAIParameters()
       ++itr;
     }
   }
+  {
+    TArtNEBULAPlaParaMap::iterator itr = fNeuLANDVETOPlaDParaMap->begin();
+    std::vector<const TArtNEBULAPlaPara*> pvec;
+    while(itr != fNeuLANDVETOPlaDParaMap->end()){
+      std::vector<const TArtNEBULAPlaPara*>::iterator it_pvec = pvec.begin();
+      if(std::find(pvec.begin(), pvec.end(), itr->second) == pvec.end()){
+	pvec.push_back(itr->second);
+	delete itr->second;
+	itr->second = 0;
+      }
+      ++itr;
+    }
+  }
 
 
   delete fNEBULAPlaUParaMap;
@@ -137,6 +152,8 @@ TArtSAMURAIParameters::~TArtSAMURAIParameters()
   delete fNEBULAHPCParaMap;
   delete fNeuLANDPlaParaMap;
   delete fTacquilaParaMap;
+  delete fNeuLANDVETOPlaUParaMap;
+  delete fNeuLANDVETOPlaDParaMap;
 
   delete listOfHODPlaPara;
   delete listOfRPTOFPlaPara;
@@ -178,6 +195,96 @@ Bool_t TArtSAMURAIParameters::LoadParameter(const char *xmlfile)
   }
   TXMLNode* node = domParser.GetXMLDocument()->GetRootNode();
   ParseParaList(node->GetChildren());
+  return true;
+}
+
+//__________________________________________________________
+Bool_t TArtSAMURAIParameters::LoadNeuLANDTCal(const char *csvfile)
+{
+  TArtCore::Info(__FILE__,"Load NeuLAND tcal from %s", csvfile);
+  ifstream file(csvfile);
+  if (!file) {
+    std::cerr << csvfile << ": Could not open." << std::endl;
+    return false;
+  }
+#define ARRAY_SIZE 100
+  int channel_array[ARRAY_SIZE];
+  Double_t ns_array[ARRAY_SIZE];
+  size_t size = 0;
+  int prev_t_type = 0, prev_bar_id = 0;
+#define ERROR_PREFIX csvfile << ':' << line_no << ": "
+  for (int line_no = 1;; ++line_no) {
+    char line[256];
+    bool is_start = false;
+    int plane, bar, t_type, channel;
+    double ns;
+    bool finalize = false;
+    file.getline(line, sizeof line);
+    if (!file) {
+      finalize = true;
+    } else {
+      if (1 == line_no) {
+        continue;
+      }
+#define STRTOK_R(start) do {\
+    token = strtok_r(start, ", ", &p);\
+    if (NULL == token) {\
+      std::cerr << ERROR_PREFIX << "Unexpected EOL." << std::endl;\
+      return false;\
+    }\
+  } while (0)
+      char *p, *token;
+      STRTOK_R(line);
+      if (0 == strcmp(token, "START_TCAL")) {
+        is_start = true;
+      } else if (0 != strcmp(token, "NEULAND_TCAL")) {
+        std::cerr << ERROR_PREFIX << "Expected START_TCAL or NEULAND_TCAL, "
+            "got \"" << token << "\"." << std::endl;
+        return false;
+      }
+      STRTOK_R(p);
+      plane = strtol(token, NULL, 10);
+      STRTOK_R(p);
+      bar = strtol(token, NULL, 10);
+      if (is_start && (0 != plane || 0 != bar)) {
+        std::cerr << ERROR_PREFIX << "START_TCAL should have 0 plane and bar."
+            << std::endl;
+        return false;
+      }
+      STRTOK_R(p);
+      t_type = strtol(token, NULL, 10);
+      STRTOK_R(p);
+      channel = strtol(token, NULL, 10);
+      STRTOK_R(p);
+      ns = strtod(token, NULL);
+      token = strtok_r(p, ", ", &p);
+      if (NULL != token) {
+        std::cerr << ERROR_PREFIX << "Garbage after line." << std::endl;
+        return false;
+      }
+    }
+    if ((prev_t_type && prev_t_type != t_type) || finalize) {
+      std::map<int,TArtNeuLANDPlaPara*>::const_iterator it =
+          fIDNeuLANDPlaParaMap.find(prev_bar_id);
+      if (fIDNeuLANDPlaParaMap.end() == it) {
+        std::cerr << ERROR_PREFIX << "Could not find NeuLAND para for bar "
+            << prev_bar_id << ", must be in XML parameters file." <<
+            std::endl;
+        return false;
+      }
+      TArtNeuLANDPlaPara *para = it->second;
+      para->SetTDCTCal(prev_t_type, channel_array, ns_array, size);
+      if (finalize) {
+        break;
+      }
+      size = 0;
+    }
+    prev_t_type = t_type;
+    prev_bar_id = is_start ? 401 : (plane - 1) * 50 + bar;
+    channel_array[size] = channel;
+    ns_array[size] = ns;
+    ++size;
+  }
   return true;
 }
 
@@ -225,6 +332,9 @@ void TArtSAMURAIParameters::ParseParaList(TXMLNode *node)
     }
     else if(strcmp(node->GetNodeName(), "TACQUILA") == 0){
       ParseTacquilaPara(node->GetChildren());
+    }
+    else if(strcmp(node->GetNodeName(), "NEULANDVETO") == 0){
+      ParseNeuLANDVETOPlaPara(node->GetChildren());
     }
   }
 }
@@ -545,6 +655,9 @@ TArtNeuLANDPlaPara *TArtSAMURAIParameters::ParseNeuLANDPlaPara(TXMLNode *node)
     }else if(strcmp(node->GetNodeName(), "att") == 0){
       Double_t val = atof(node->GetText());
       para->SetAtt(val);
+    }else if(strcmp(node->GetNodeName(), "zpos") == 0){
+      Double_t val = atof(node->GetText());
+      para->SetZPos(val);
     }else if(strcmp(node->GetNodeName(), "sam0") == 0){
       sam0 = atoi(node->GetText());
     }else if(strcmp(node->GetNodeName(), "gtb0") == 0){
@@ -648,6 +761,148 @@ const TArtTacquilaPara* TArtSAMURAIParameters::FindTacquilaPara(Int_t id) const
   std::map<int,TArtTacquilaPara*>::const_iterator it = fIDTacquilaParaMap.find(id);
   if(it != fIDTacquilaParaMap.end()) return it->second;
   else return 0;
+}
+//__________________________________________________________
+TArtNEBULAPlaPara *TArtSAMURAIParameters::ParseNeuLANDVETOPlaPara(TXMLNode *node)
+{
+  TArtNEBULAPlaPara* para = new TArtNEBULAPlaPara;
+  Int_t tu_geo = -1, tu_ch = -1, qu_geo = -1, qu_ch = -1;
+  Int_t td_geo = -1, td_ch = -1, qd_geo = -1, qd_ch = -1;
+
+  for(; node; node = node->GetNextNode()){
+    if(node->GetNodeType() != TXMLNode::kXMLElementNode) continue; // Element Node
+
+    if(strcmp(node->GetNodeName(), "ID") == 0){ 
+      Int_t id = atoi(node->GetText());
+      para->SetID(id);
+    }else if(strcmp(node->GetNodeName(), "NAME") == 0){
+      TString name = node->GetText();
+      para->SetDetectorName(name);
+    }else if(strcmp(node->GetNodeName(), "FPl") == 0){
+      Int_t fpl = atoi(node->GetText());
+      para->SetFpl(fpl);
+    }else if(strcmp(node->GetNodeName(), "Layer") == 0){
+      Int_t layer = atoi(node->GetText());
+      para->SetLayer(layer);
+    }else if(strcmp(node->GetNodeName(), "SubLayer") == 0){
+      Int_t sublayer = atoi(node->GetText());
+      para->SetSubLayer(sublayer);
+    }else if(strcmp(node->GetNodeName(), "PosX") == 0){
+      Double_t posx = atof(node->GetText());
+      para->SetDetPos(posx, 0);
+    }else if(strcmp(node->GetNodeName(), "PosY") == 0){
+      Double_t posy = atof(node->GetText());
+      para->SetDetPos(posy, 1);
+    }else if(strcmp(node->GetNodeName(), "PosZ") == 0){
+      Double_t posz = atof(node->GetText());
+      para->SetDetPos(posz, 2);
+    }else if(strcmp(node->GetNodeName(), "TUCal") == 0){
+      Double_t tucal = atof(node->GetText());
+      para->SetTUCal(tucal);
+    }else if(strcmp(node->GetNodeName(), "TUOff") == 0){
+      Double_t tuoff = atof(node->GetText());
+      para->SetTUOff(tuoff);
+    }else if(strcmp(node->GetNodeName(), "TUSlw") == 0){
+      Double_t tuslw = atof(node->GetText());
+      para->SetTUSlw(tuslw);
+    }else if(strcmp(node->GetNodeName(), "QUCal") == 0){
+      Double_t qucal = atof(node->GetText());
+      para->SetQUCal(qucal);
+    }else if(strcmp(node->GetNodeName(), "QUPed") == 0){
+      Double_t quped = atof(node->GetText());
+      para->SetQUPed(quped);
+    }else if(strcmp(node->GetNodeName(), "TDCal") == 0){
+      Double_t tdcal = atof(node->GetText());
+      para->SetTDCal(tdcal);
+    }else if(strcmp(node->GetNodeName(), "TDOff") == 0){
+      Double_t tdoff = atof(node->GetText());
+      para->SetTDOff(tdoff);
+    }else if(strcmp(node->GetNodeName(), "TDSlw") == 0){
+      Double_t tdslw = atof(node->GetText());
+      para->SetTDSlw(tdslw);
+    }else if(strcmp(node->GetNodeName(), "QDCal") == 0){
+      Double_t qdcal = atof(node->GetText());
+      para->SetQDCal(qdcal);
+    }else if(strcmp(node->GetNodeName(), "QDPed") == 0){
+      Double_t qdped = atof(node->GetText());
+      para->SetQDPed(qdped);
+    }else if(strcmp(node->GetNodeName(), "DTCal") == 0){
+      Double_t dtcal = atof(node->GetText());
+      para->SetDTCal(dtcal);
+    }else if(strcmp(node->GetNodeName(), "DTOff") == 0){
+      Double_t dtoff = atof(node->GetText());
+      para->SetDTOff(dtoff);
+    }else if(strcmp(node->GetNodeName(), "TAveOff") == 0){
+      Double_t taveoff = atof(node->GetText());
+      para->SetTAveOff(taveoff);
+    }else if(strcmp(node->GetNodeName(), "Ignore") == 0){
+      Int_t ignore = atoi(node->GetText());
+      para->SetIgnore(ignore);
+    }else if(strcmp(node->GetNodeName(), "tu_geo") == 0){
+      tu_geo = atoi(node->GetText());
+    }else if(strcmp(node->GetNodeName(), "tu_ch") == 0){
+      tu_ch = atoi(node->GetText());
+    }else if(strcmp(node->GetNodeName(), "qu_geo") == 0){
+      qu_geo = atoi(node->GetText());
+    }else if(strcmp(node->GetNodeName(), "qu_ch") == 0){
+      qu_ch = atoi(node->GetText());
+    }else if(strcmp(node->GetNodeName(), "td_geo") == 0){
+      td_geo = atoi(node->GetText());
+    }else if(strcmp(node->GetNodeName(), "td_ch") == 0){
+      td_ch = atoi(node->GetText());
+    }else if(strcmp(node->GetNodeName(), "qd_geo") == 0){
+      qd_geo = atoi(node->GetText());
+    }else if(strcmp(node->GetNodeName(), "qd_ch") == 0){
+      qd_ch = atoi(node->GetText());
+    }
+  }
+  Int_t detector_q = NEULANDVETOQ;
+  Int_t detector_t = NEULANDVETOT;
+
+  para->SetMapU(detector_t, tu_geo, tu_ch);
+  fNeuLANDVETOPlaUParaMap->insert(TArtNEBULAPlaParaPair(para->GetMapU(), para));
+  para->SetMapD(detector_t, td_geo, td_ch);
+  fNeuLANDVETOPlaDParaMap->insert(TArtNEBULAPlaParaPair(para->GetMapD(), para));
+
+  para->SetMapU(detector_q, qu_geo, qu_ch);
+  fNeuLANDVETOPlaUParaMap->insert(TArtNEBULAPlaParaPair(para->GetMapU(), para));
+  para->SetMapD(detector_q, qd_geo, qd_ch);
+  fNeuLANDVETOPlaDParaMap->insert(TArtNEBULAPlaParaPair(para->GetMapD(), para));
+  
+  fIDNeuLANDVETOPlaParaMap.insert(std::pair<int,TArtNEBULAPlaPara*>(para->GetID(), para));
+
+  return para;
+
+}
+
+const TArtNEBULAPlaPara* TArtSAMURAIParameters::FindNeuLANDVETOPlaUPara(const TArtRIDFMap &rmap) const
+{
+  TArtNEBULAPlaParaMap::const_iterator itr = fNeuLANDVETOPlaUParaMap->find(rmap);
+  if(itr != fNeuLANDVETOPlaUParaMap->end()) return itr->second;
+  else return 0;
+}
+
+const TArtNEBULAPlaPara* TArtSAMURAIParameters::FindNeuLANDVETOPlaDPara(const TArtRIDFMap &rmap) const
+{
+  TArtNEBULAPlaParaMap::const_iterator itr = fNeuLANDVETOPlaDParaMap->find(rmap);
+  if(itr != fNeuLANDVETOPlaDParaMap->end()) return itr->second;
+  else return 0;
+}
+
+const TArtNEBULAPlaPara* TArtSAMURAIParameters::FindNeuLANDVETOPlaPara(Int_t id) const
+{
+  std::map<int,TArtNEBULAPlaPara*>::const_iterator it = fIDNeuLANDVETOPlaParaMap.find(id);
+  if(it != fIDNeuLANDVETOPlaParaMap.end()) return it->second;
+  else return 0;
+}
+
+void TArtSAMURAIParameters::PrintListOfNeuLANDVETOPlaPara() const {
+  TArtNEBULAPlaParaMap::iterator it = fNeuLANDVETOPlaUParaMap->begin();
+  while(it !=  fNeuLANDVETOPlaUParaMap->end()){
+    std::cout << *(it->second) << std::endl;
+    ++it;
+  }
+  //std::cout<<fNeuLANDVETOPlaUParaMap->size()<<std::endl;
 }
 
 //
@@ -903,6 +1158,7 @@ TArtTEDCsIPara *TArtSAMURAIParameters::ParseTEDCsIPara(TXMLNode *node)
   Double_t  e_ch2mev = 0;
 
   Int_t fpl_adc = 13, geo_adc, ch_adc;
+  Int_t geo_tdc, ch_tdc;
 
   for ( ; node; node = node->GetNextNode()) {
     if (node->GetNodeType() == TXMLNode::kXMLElementNode) { // Element Node
@@ -928,13 +1184,18 @@ TArtTEDCsIPara *TArtSAMURAIParameters::ParseTEDCsIPara(TXMLNode *node)
 	geo_adc = atoi(node->GetText());
       if (strcmp(node->GetNodeName(), "e_ch") == 0)
 	ch_adc = atoi(node->GetText());
+      if (strcmp(node->GetNodeName(), "t_geo") == 0)
+	geo_tdc = atoi(node->GetText());
+      if (strcmp(node->GetNodeName(), "t_ch") == 0)
+	ch_tdc = atoi(node->GetText());
     }
   }
 
   TArtTEDCsIPara * para = new TArtTEDCsIPara(id, name, fpl, row, column, e_ch2mev, e_ped);
-  para->SetMap(fpl_adc, TED, geo_adc, ch_adc);
-
+  para->SetMap(fpl_adc, TEDQ, geo_adc, ch_adc,
+	       fpl_adc, TEDT, geo_tdc, ch_tdc);
   ted_pmap.insert(std::pair<TArtRIDFMap, TArtTEDCsIPara *>(*((TArtRIDFMap *)para->GetADCMap()), para));
+  ted_pmap.insert(std::pair<TArtRIDFMap, TArtTEDCsIPara *>(*((TArtRIDFMap *)para->GetTDCMap()), para));
 
   return para;
 

@@ -104,7 +104,7 @@ bool TAlEncMINOSExample::Calculate()
   TArtCalibMINOSData *minos = new TArtCalibMINOSData();
 
 
-  //  std::cout<<"Event : "<<eventnum<<" Size : "<<CalibMINOS->GetNumCalibMINOS()<<std::endl;
+  //  std::cout<<" Size : "<<fCalibMINOS->GetNumCalibMINOS()<<std::endl;
 
   //  if(neve%Refresh==0) {hQt1->Reset(); hpoly1->Reset(""); hasic1->Reset();}
 
@@ -126,14 +126,16 @@ bool TAlEncMINOSExample::Calculate()
       AsicHIT[AsicID] = kTRUE;
       ListAsicID[NAsicFired] = AsicID;
       NAsicFired++;
+      //      std::cout << ID << " " << AsicID+1 << std::endl;
     }
 
-    
+    //std::cout << xPad << " " << yPad << " " << minos->GetNData() << std::endl;
     if( !(xPad==0 && yPad==0) ) {
 
       //      Double_t Ring = sqrt(xPad*xPad + yPad*yPad);
       for(Int_t j=0;j<minos->GetNData();j++) 
 	{
+	  //	  cout << minos->
 	  if(minos->GetCalibValue(j)>MaxCharge[AsicID]) {
 
 	    MaxCharge[AsicID] = minos->GetCalibValue(j);
@@ -170,11 +172,12 @@ bool TAlEncMINOSExample::Calculate()
 
   for(UInt_t i=0;i<NAsicFired;i++){
     AsicID = ListAsicID[i];
-    fAnaLoop->Add(MINOS, Fec , AsicID+1, FEC_forMaxCharge[AsicID]);
-    fAnaLoop->Add(MINOS, Xpos, AsicID+1, PosX_forMaxCharge[AsicID]);
-    fAnaLoop->Add(MINOS, Ypos, AsicID+1, PosY_forMaxCharge[AsicID]);
-    fAnaLoop->Add(MINOS, Qmax, AsicID+1, MaxCharge[AsicID]);
-    fAnaLoop->Add(MINOS, Time, AsicID+1, AsicTime_forMaxCharge[AsicID]);
+    fAnaLoop->Add(MINOS,  Fec , AsicID+1, FEC_forMaxCharge[AsicID]);
+    fAnaLoop->Add(MINOS,  Xpos, AsicID+1, PosX_forMaxCharge[AsicID]);
+    fAnaLoop->Add(MINOS,  Ypos, AsicID+1, PosY_forMaxCharge[AsicID]);
+    fAnaLoop->Add(MINOS,  Qmax, AsicID+1, MaxCharge[AsicID]);
+    fAnaLoop->Add(MINOS,  Time, AsicID+1, AsicTime_forMaxCharge[AsicID]);
+    fAnaLoop->Add(MINOS, MaxCh, AsicID+1, Channel_forMaxCharge[AsicID]);
   }
 
 

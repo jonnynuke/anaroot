@@ -51,6 +51,7 @@
 #pragma link C++ class TArtNeuLANDPlaPara+;
 #pragma link C++ class TArtTacquilaPara+;
 #pragma link C++ class TArtTacquilaMap+;
+#pragma link C++ class TArtCalibNeuLANDVETO+;
 
 #pragma link C++ class TArtFragment+;
 #pragma link C++ class TArtRecoFragment+;

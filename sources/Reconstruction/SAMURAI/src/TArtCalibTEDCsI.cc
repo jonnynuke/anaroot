@@ -46,7 +46,8 @@ void TArtCalibTEDCsI::LoadData()   {
   for(Int_t i=0;i<fEvent->GetNumSeg();i++){
     TArtRawSegmentObject *seg = fEvent->GetSegment(i);
     Int_t detector = seg->GetDetector();
-    if(TED == detector) LoadData(seg);
+    if(TEDQ == detector ||
+       TEDT == detector   ) LoadData(seg);
   }
   return;
 
@@ -59,7 +60,7 @@ void TArtCalibTEDCsI::LoadData(TArtRawSegmentObject *seg)   {
   Int_t fpl      = seg->GetFP();
   Int_t detector = seg->GetDetector();
 
-  if(TED != detector) return;
+  if(TEDQ != detector && TEDT != detector) return;
 
   for(Int_t j=0;j<seg->GetNumData();j++){
     TArtRawDataObject *d = seg->GetData(j);
@@ -94,7 +95,8 @@ void TArtCalibTEDCsI::LoadData(TArtRawSegmentObject *seg)   {
     }
 
     // set raw data
-    csi->SetRawADC(val);
+    if      (TEDQ == detector) csi->SetRawADC(val);
+    else if (TEDT == detector) csi->SetRawTDC(val);
 
   }
 
@@ -104,7 +106,7 @@ void TArtCalibTEDCsI::LoadData(TArtRawSegmentObject *seg)   {
 
 //__________________________________________________________
 void TArtCalibTEDCsI::ClearData()   {
-  fTEDCsIArray->Clear();
+  fTEDCsIArray->Clear("C");
   fTEDCsIParaArray.clear();
   fDataLoaded = false;
   fReconstructed = false;
@@ -125,8 +127,12 @@ void TArtCalibTEDCsI::ReconstructData()   { // call after the raw data are loade
 
     Int_t adc = csi->GetRawADC();
     Double_t fEnergy = (Double_t)adc - para->GetEPedestal();
-
     csi->SetEnergy(fEnergy * para->GetECh2MeV());
+
+    Int_t tdc = csi->GetRawTDC();
+    Double_t Timing = (Double_t)tdc * para->GetTCh2nsec() 
+      - para->GetTOffset();
+    csi->SetTiming(Timing);
 
   }
 

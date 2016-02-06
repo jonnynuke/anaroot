@@ -102,12 +102,13 @@ public:
   static const int MaxAnalyserSize = 64;
   static const int MaxWNumSize = 128;
   //  static const int MaxIndexSize = 2028;
-  static const int MaxIndexSize = 256;
+  static const int MaxIndexSize = 256*2;
 
   TArtValMap();
   virtual ~TArtValMap();
 
-  Double_t fVal[MaxAnalyserSize][MaxWNumSize][MaxIndexSize];
+  //  Double_t fVal[MaxAnalyserSize][MaxWNumSize][MaxIndexSize];
+  std::map<int, std::map<int, std::map<int, Double_t>  > > fVal ; 
   bool fFlag[MaxAnalyserSize][MaxWNumSize][MaxIndexSize];
   std::vector<TArtValIndex> fCleanList;
 

@@ -57,7 +57,7 @@ void TArtCalibDCHit::LoadData()   {
 
 //__________________________________________________________
 void TArtCalibDCHit::ClearData()   {
-  fDCHitArray->Clear();
+  fDCHitArray->Clear("C");
   fDCHitParaArray.clear();
   fDataLoaded = false;
   fReconstructed = false;

@@ -50,6 +50,7 @@ public:
   TArtNeuLANDPla* GetNeuLANDPla(Int_t i) const;
   TArtNeuLANDPla* FindNeuLANDPla(Int_t id) const;//find by id
   TArtNeuLANDPlaArray* GetNeuLANDPlaArray() const;
+  TArtNeuLANDPla const *GetNeuLANDMasterStart() const;
 
   Int_t GetNumNeuLANDPlaPara() const;
   TArtNeuLANDPlaPara* GetNeuLANDPlaPara(Int_t i) const;
@@ -60,6 +61,7 @@ private:
   //  TArtCalibSAMURAIT0* fCalibSAMURAIT0;
   TClonesArray* fT0Array;
   TArtNeuLANDPlaArray* fNeuLANDPlaArray;
+  TArtNeuLANDPla *fNeuLANDMasterStart;
   TArtNeuLANDPlaParaArray* fNeuLANDPlaParaArray;
 
   const TArtSAMURAIParameters* fSAMURAIParameters;

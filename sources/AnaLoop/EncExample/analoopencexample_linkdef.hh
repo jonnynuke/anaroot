@@ -48,6 +48,8 @@
 #pragma link C++ class TAlEncRawDataExampleFactory+;
 #pragma link C++ class TAlEncDALIExample+;
 #pragma link C++ class TAlEncDALIExampleFactory+;
+#pragma link C++ class TAlEncNeuLANDExample+;
+#pragma link C++ class TAlEncNeuLANDExampleFactory+;
 
 #if USE_MINOS
 #pragma link C++ class TAlEncMINOSExample+;

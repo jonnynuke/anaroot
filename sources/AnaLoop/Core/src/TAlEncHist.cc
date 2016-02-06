@@ -44,7 +44,10 @@ bool TAlEncHist::Calculate()
   if(hist->GetDimension() == 1){
     for(int j=0; j<(int)valindexarray.size(); ++j){
       Double_t val;
-      if(fAnaLoop->fAnaFile->Find(valindexarray[j], val)) hist->Fill(val);
+      if(fAnaLoop->fAnaFile->Find(valindexarray[j], val)) {
+	//	std::cout << val << std::endl;
+	hist->Fill(val);
+      }
     }
   }else if(hist->GetDimension() == 2){
     for(int j=0; j<(int)valindexarray.size(); j+=2){

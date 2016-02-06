@@ -183,7 +183,7 @@ TArtNEBULAHPCParaArray* TArtCalibNEBULAHPC::GetNEBULAHPCParaArray() const
 //__________________________________________________________
 void TArtCalibNEBULAHPC::ClearData()
 {
-  fNEBULAHPCArray->Clear();
+  fNEBULAHPCArray->Clear("C");
   fNEBULAHPCParaArray->Clear();
   fIDNHPCMap.clear();
   fIDNHPCParaMap.clear();

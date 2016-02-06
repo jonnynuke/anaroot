@@ -109,7 +109,7 @@ void TArtCalibHODPla::LoadData(TArtRawSegmentObject *seg)   {
 
 //__________________________________________________________
 void TArtCalibHODPla::ClearData()   {
-  fHODPlaArray->Clear();
+  fHODPlaArray->Clear("C");
   fHODPlaParaArray.clear();
   fDataLoaded = false;
   fReconstructed = false;

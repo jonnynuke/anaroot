@@ -42,13 +42,14 @@ std::map<int, TAlEncFactory*> TArtAnaFile::fEncFactoryMapInt;
 
 TArtValMap::TArtValMap()
 {
-  for(int i=0; i<MaxAnalyserSize; ++i){
-    for(int j=0; j<MaxWNumSize; ++j){
-      for(int k=0; k<MaxIndexSize; ++k){
-	fVal[i][j][k] = TArtMath::InvalidNum();
-      }
-    }
-  }
+  //  std::cout << ":: " <<  MaxIndexSize << std::endl;  
+  // for(int i=0; i<MaxAnalyserSize; ++i){
+  //   for(int j=0; j<MaxWNumSize; ++j){
+  //     for(int k=0; k<MaxIndexSize; ++k){
+  //	fVal[i][j][k] = TArtMath::InvalidNum();
+  //     }
+  //   }
+  // }
   memset(fFlag,false,sizeof(bool)*MaxAnalyserSize*MaxWNumSize*MaxIndexSize);
 }
 
@@ -288,6 +289,7 @@ bool TArtAnaFile::Add(int analyser, int wnum, int index, Double_t val)
      TArtValMap::MaxWNumSize <= wnum ||
      TArtValMap::MaxIndexSize <= index){
     TArtValIndex valindex(analyser, wnum, index);
+    std::cout << TArtValMap::MaxAnalyserSize << " " << TArtValMap::MaxWNumSize << " " << TArtValMap::MaxIndexSize  << std::endl;
     std::cout << "out of range of valindex!!" << std::endl;
     std::cout << "valindex: " << valindex << std::endl;
     abort();

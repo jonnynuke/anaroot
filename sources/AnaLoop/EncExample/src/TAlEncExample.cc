@@ -23,6 +23,7 @@
 #include "TAlEncNEBULAExample.hh"
 #include "TAlEncNEBULAHPCExample.hh"
 #include "TAlEncDALIExample.hh"
+#include "TAlEncNeuLANDExample.hh"
 
 #if USE_MINOS
 #include "TAlEncMINOSExample.hh"
@@ -51,7 +52,7 @@ void book(TAlEncExample* analoop, const char* anafilename)
     TArtAnaFile::RegisterEncFactory(Analyser::NEBULA, new TAlEncNEBULAExampleFactory);
     TArtAnaFile::RegisterEncFactory(Analyser::NEBULAHPC, new TAlEncNEBULAHPCExampleFactory);
     TArtAnaFile::RegisterEncFactory(Analyser::SAMURAIHOD, new TAlEncSAMURAIHODExampleFactory);
-    //TArtAnaFile::RegisterEncFactory(Analyser::SAMURAIPLA, new TAlEncPlasticExampleFactory);
+    //    TArtAnaFile::RegisterEncFactory(Analyser::SAMURAIPLA, new TAlEncPlasticExampleFactory);
     TArtAnaFile::RegisterEncFactory(Analyser::SAMURAIPLA, new TAlEncSAMURAIPlaExampleFactory);// minakata wrote 20130415 01:05
     TArtAnaFile::RegisterEncFactory(Analyser::SAMURAIDC, new TAlEncSAMURAIDCExampleFactory);
     TArtAnaFile::RegisterEncFactory(Analyser::SAMURAITZero, new TAlEncSAMURAITZeroExampleFactory);
@@ -63,7 +64,7 @@ void book(TAlEncExample* analoop, const char* anafilename)
 #if USE_MINOS
     TArtAnaFile::RegisterEncFactory(Analyser::MINOS, new TAlEncMINOSExampleFactory);
 #endif
-
+    TArtAnaFile::RegisterEncFactory(Analyser::NEULAND, new TAlEncNeuLANDExampleFactory);
   }
 
   book((TArtAnaLoop*)analoop, anafilename);

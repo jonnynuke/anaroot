@@ -143,7 +143,7 @@ TArtRecoFragment::~TArtRecoFragment()  {
 
 //__________________________________________________________
 void TArtRecoFragment::ClearData()   {
-  fFragmentArray->Clear();
+  fFragmentArray->Clear("C");
   fReconstructed = false;
   return;
 }

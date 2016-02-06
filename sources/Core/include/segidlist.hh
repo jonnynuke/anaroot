@@ -108,8 +108,8 @@ static const int HODFQ    = 31 ;// ADC
 static const int HODFT    = 32 ;// TDC
 static const int HODPQ    = 33 ;// ADC
 static const int HODPT    = 34 ;// TDC
-static const int TED      = 35 ;// ADC
-static const int TIRC     = 36 ;// ADC
+static const int TEDQ     = 35 ;// ADC
+static const int TEDT     = 36 ;// TDC
 static const int PDC      = 37 ;// ADC
 static const int HODPQ2   = 39 ;// QDC
 

@@ -43,6 +43,7 @@ TArtCalibNeuLAND::TArtCalibNeuLAND()
   if(!fT0Array) TArtCore::Info(__FILE__, "t0 will be NaN during this analysis.");
 
   tac16_array = new TList;
+  fNeuLANDMasterStart = NULL;
 
 }
 
@@ -52,6 +53,7 @@ TArtCalibNeuLAND::~TArtCalibNeuLAND()
   delete fNeuLANDPlaParaArray;
   delete fNeuLANDPlaArray;
   delete tac16_array;
+  delete fNeuLANDMasterStart;
 }
 
 //__________________________________________________________
@@ -86,6 +88,7 @@ void TArtCalibNeuLAND::LoadData(TArtRawSegmentObject* seg)
       reftac->mod = d->GetModule();
       reftac->tac = d->GetTac();
       //TArtCore::Info(__FILE__,"%d, %d, %d, %d", reftac->sam, reftac->gtb, reftac->mod, reftac->tac);
+//std::cout << reftac->sam << ' ' << reftac->gtb << ' ' << reftac->mod << ' ' << reftac->tac << ' ' << ch << std::endl;
       tac16_array->Add(reftac);
     }
   }
@@ -114,33 +117,49 @@ void TArtCalibNeuLAND::LoadData(TArtRawSegmentObject* seg)
       fIDNPlaParaMap.insert(std::pair<int, int>(para->GetID(), npara));
     }
 
-    TArtNeuLANDPla* pla = FindNeuLANDPla(para->GetID());
-    if(!pla){
-      Int_t npla = fNeuLANDPlaArray->GetEntries();
-      pla = new ((*fNeuLANDPlaArray)[npla]) TArtNeuLANDPla();
+    // SAMURAI Master Start is connected to this channel.
+    TArtNeuLANDPla *pla;
+    if (6 == sam && 1 == gtb && 7 == mod && 11 == ch) {
+      pla = new TArtNeuLANDPla();
+      fNeuLANDMasterStart = pla;
       pla->SetID(para->GetID());
       pla->SetFpl(para->GetFpl());
       pla->SetDetectorName(para->GetDetectorName());
-      //pla->SetDetectorName(*(para->GetDetectorName()));
-      pla->SetLayer(para->GetLayer());
-      pla->SetBarID(para->GetBarID());
-
-      fIDNPlaMap.insert(std::pair<int, int>(para->GetID(), npla));
-    }
-
-    if(para->GetMap(0) == mm){
-      pla->SetQRaw(0,d->GetAdc());
       pla->SetTCycle(0,d->GetCycle());
       pla->SetTac(0,d->GetTac());
       pla->SetTacRef(0,GetTac16(sam,gtb,mod));
       pla->SetFired(0);
-    }else{
-      pla->SetQRaw(1,d->GetAdc());
-      pla->SetTCycle(1,d->GetCycle());
-      pla->SetTac(1,d->GetTac());
-      pla->SetTacRef(1,GetTac16(sam,gtb,mod));
-      pla->SetFired(1);
     }
+    else {
+      pla = FindNeuLANDPla(para->GetID());
+      if(!pla){
+        Int_t npla = fNeuLANDPlaArray->GetEntries();
+        pla = new ((*fNeuLANDPlaArray)[npla]) TArtNeuLANDPla();
+        pla->SetID(para->GetID());
+        pla->SetFpl(para->GetFpl());
+        pla->SetDetectorName(para->GetDetectorName());
+        //pla->SetDetectorName(*(para->GetDetectorName()));
+        pla->SetLayer(para->GetLayer());
+        pla->SetBarID(para->GetBarID());
+
+        fIDNPlaMap.insert(std::pair<int, int>(para->GetID(), npla));
+      }
+
+      if(para->GetMap(0) == mm){
+        pla->SetQRaw(0,d->GetAdc());
+        pla->SetTCycle(0,d->GetCycle());
+        pla->SetTac(0,d->GetTac());
+        pla->SetTacRef(0,GetTac16(sam,gtb,mod));
+        pla->SetFired(0);
+      }else{
+        pla->SetQRaw(1,d->GetAdc());
+        pla->SetTCycle(1,d->GetCycle());
+        pla->SetTac(1,d->GetTac());
+        pla->SetTacRef(1,GetTac16(sam,gtb,mod));
+        pla->SetFired(1);
+      } 
+    }
+    pla->SetTacquilaID(sam, gtb, mod, ch);
   } // for(Int_t j=0; j<seg->GetNumTacquilaData(); ++j)
 
   fDataLoaded = true;
@@ -162,6 +181,28 @@ void TArtCalibNeuLAND::ReconstructData()
 {
   if(!fDataLoaded) LoadData();
 
+  Double_t time_ms = 0;
+  if (NULL != fNeuLANDMasterStart) {
+    TArtNeuLANDPla* pla = fNeuLANDMasterStart;
+    Int_t id = pla->GetID();
+    const TArtNeuLANDPlaPara* para = FindNeuLANDPlaPara(id);
+    if(!para){
+      TArtCore::Info(__FILE__,"cannot find para %d", id); // programming problem
+    }
+    else {
+      Double_t time_ref;
+      if (para->HasTDCTCal()) {
+        time_ms = para->GetTDCTCal(0, pla->GetTac(0), false);
+        Double_t time_ref = para->GetTDCTCal(0, pla->GetTacRef(0), true);
+      } else {
+        time_ms = 24.9982/(para->GetTDC25ns(0)-para->GetTDC0ns(0)) * ((Double_t)pla->GetTac(0) - para->GetTDC0ns(0));
+        time_ref = 24.9982/(para->GetTDC25ns_t17(0)-para->GetTDC0ns_t17(0)) * ((Double_t)pla->GetTacRef(0) - para->GetTDC0ns_t17(0));
+      }
+      time_ms = time_ms + 25.*pla->GetTCycle(0) - time_ref;
+      pla->SetTRaw(0,time_ms);
+    }
+  }
+
   for(Int_t i=0;i<GetNumNeuLANDPla();++i){
     TArtNeuLANDPla* pla = GetNeuLANDPla(i);
     Int_t id = pla->GetID();
@@ -174,26 +215,33 @@ void TArtCalibNeuLAND::ReconstructData()
     // if(pla->GetQRaw0() < 0 || pla->GetQRaw0() < 0) TArtCore::Warning(__FILE__,"Both PMT seems not to be fired. ID:%d", id); 
     // start reconstruction
 
-    for(int i=0;i<2;i++){
-      Double_t energy = QDC2Energy(pla->GetQRaw(i)-para->GetQPed(i));
-      Double_t energy_final = i==0 ? 
+    for(int j=0;j<2;j++){
+      Double_t energy = QDC2Energy(pla->GetQRaw(j)-para->GetQPed(j));
+      Double_t energy_final = j==0 ? 
 	energy * para->GetEDiffOffset() * para->GetESyncOffset() : 
 	energy / para->GetEDiffOffset() * para->GetESyncOffset();
-      pla->SetQCal(i,energy_final);
-      Double_t time = 24.9982/(para->GetTDC25ns(i)-para->GetTDC0ns(i)) * ((Double_t)pla->GetTac(i) - para->GetTDC0ns(i));
-      Double_t time_ref = 24.9982/(para->GetTDC25ns_t17(i)-para->GetTDC0ns_t17(i)) * ((Double_t)pla->GetTacRef(i) - para->GetTDC0ns_t17(i));
-      time = time + 25.*pla->GetTCycle(i) - time_ref;
-      pla->SetTRaw(i,time);
+      pla->SetQCal(j,energy_final);
+      Double_t time;
+      Double_t time_ref;
+      if (para->HasTDCTCal()) {
+        time = para->GetTDCTCal(j, pla->GetTac(j), false);
+        time_ref = para->GetTDCTCal(j, pla->GetTacRef(j), true);
+      } else {
+        time = 24.9982/(para->GetTDC25ns(j)-para->GetTDC0ns(j)) * ((Double_t)pla->GetTac(j) - para->GetTDC0ns(j));
+        time_ref = 24.9982/(para->GetTDC25ns_t17(j)-para->GetTDC0ns_t17(j)) * ((Double_t)pla->GetTacRef(j) - para->GetTDC0ns_t17(j));
+      }
+      time = time + 25.*pla->GetTCycle(j) - time_ref;
+      time -= time_ms;
+      pla->SetTRaw(j,time);
 
-      time = i == 0 ? 
+      time = j == 0 ? 
 	time - para->GetTDiffOffset()/2. - para->GetTSyncOffset() + WalkCorrection(energy) : 
 	time + para->GetTDiffOffset()/2. - para->GetTSyncOffset() + WalkCorrection(energy) ;
-      pla->SetTCal(i,time);
+      pla->SetTCal(j,time);
     }
-    pla->SetPos((pla->GetTCal(0) - pla->GetTCal(1)) * para->GetVScint() 
-		* 10 // for cm -> mm
-		);
-
+    pla->SetPos((pla->GetTCal(0) - pla->GetTCal(1)) * para->GetVScint() * 10 /* 10 for cm -> mm)*/);
+    // std::cout << pla->GetFired(0) << "  " << pla->GetTRaw(0) << "  "  << pla->GetFired(1) << "  " << pla->GetTRaw(1) << std::endl;
+    pla->SetZPos(para->GetZPos());
   }
   
   fReconstructed = true;
@@ -229,6 +277,12 @@ Int_t TArtCalibNeuLAND::GetNumNeuLANDPla() const
 TArtNeuLANDPla* TArtCalibNeuLAND::GetNeuLANDPla(Int_t i) const
 {
   return (TArtNeuLANDPla*)fNeuLANDPlaArray->At(i);
+}
+
+//__________________________________________________________
+TArtNeuLANDPla const *TArtCalibNeuLAND::GetNeuLANDMasterStart() const
+{
+  return fNeuLANDMasterStart;
 }
 
 //__________________________________________________________
@@ -283,5 +337,7 @@ void TArtCalibNeuLAND::ClearData()
   fIDNPlaParaMap.clear();
   fDataLoaded = false;
   fReconstructed = false;
+  delete fNeuLANDMasterStart;
+  fNeuLANDMasterStart = NULL;
 }
 

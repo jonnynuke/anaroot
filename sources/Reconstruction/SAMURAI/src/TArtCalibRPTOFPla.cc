@@ -148,9 +148,9 @@ void TArtCalibRPTOFPla::LoadData(TArtRawSegmentObject *seg)   {
 
 //__________________________________________________________
 void TArtCalibRPTOFPla::ClearData()   {
-  fRPTOFPlaArray->Clear();
+  fRPTOFPlaArray->Clear("C");
   fRPTOFPlaParaArray.clear();
-  fRPTOFWPlaArray->Clear();
+  fRPTOFWPlaArray->Clear("C");
   fRPTOFWPlaParaArray.clear();
   fDataLoaded = false;
   fReconstructed = false;

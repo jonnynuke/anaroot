@@ -22,7 +22,10 @@ class TArtDCTrack : public TArtDataObject {
     hitid.clear(); dl.clear(); lx.clear(); lz.clear(); 
     dcangle.clear(); plane_id.clear();
   }
-  virtual ~TArtDCTrack(){}
+  virtual ~TArtDCTrack(){
+    hitid.clear(); dl.clear(); lx.clear(); lz.clear();
+    dcangle.clear(); plane_id.clear();
+  }
 
   // function to set data
   // i=0: x-axis, i=1 y-axis for BDC
@@ -68,6 +71,20 @@ class TArtDCTrack : public TArtDataObject {
   virtual void Print(){
     TArtCore::Info(__FILE__,"nhit:%d, chi2:%f, ndf:%d, x:%f, a:%f, y:%f, b:%f",
 		   nhitlayer,chi2,ndf,cx[0],ca[0],cx[1],ca[1]);
+  }
+
+  void 	Clear (Option_t* o=""){
+    //    cout << "Clear" << endl;
+    hitid.clear(); dl.clear(); lx.clear(); lz.clear(); 
+    dcangle.clear(); plane_id.clear();
+    
+    std::vector<Int_t>().swap(hitid); 
+    std::vector<Double_t>().swap(dl); 
+    std::vector<Double_t>().swap(lx); 
+    std::vector<Double_t>().swap(lz); 
+    std::vector<Int_t>().swap(plane_id); 
+    std::vector<Double_t>().swap(dcangle);
+
   }
 
  private:

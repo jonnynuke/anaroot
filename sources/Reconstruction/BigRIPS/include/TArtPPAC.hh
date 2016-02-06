@@ -8,7 +8,7 @@ class TArtPPAC : public TArtDataObject {
  public:
   TArtPPAC(){Clear();xzpos=-1;yzpos=-1;}
   virtual ~TArtPPAC(){}
-  virtual void Clear(){fTX1Raw=0;fTX2Raw=0;fTY1Raw=0;fTY2Raw=0;fTARaw=0;fQX1Raw=0;fQX2Raw=0;fQY1Raw=0;fQY2Raw=0;fQARaw=0;fTX1=-1;fTX2=-1;fTY1=-1;fTY2=-1;fTA=-1;fFiredX=false;fFiredY=false;SetDataState(0);}
+  virtual void Clear(){fTX1Raw=0;fTX2Raw=0;fTY1Raw=0;fTY2Raw=0;fTARaw=0;fQX1Raw=0;fQX2Raw=0;fQY1Raw=0;fQY2Raw=0;fQARaw=0;fTX1=-1;fTX2=-1;fTY1=-1;fTY2=-1;fTA=-1;fFiredX=false;fFiredY=false;fTSumX=-9999.;fTSumY=-9999.;fTDiffX=-9999.;fTDiffY=-9999.;fX=-9999.;fY=-9999.;SetDataState(0);}
 
   virtual void SetXZPos(Double_t val){xzpos = val;}
   virtual void SetYZPos(Double_t val){yzpos = val;}

@@ -31,6 +31,8 @@ namespace Analyser{
 
     MINOS=51,     //51
 
+    NEULAND=60,     //60
+
     RAWDATA=99,   //99
 
   };

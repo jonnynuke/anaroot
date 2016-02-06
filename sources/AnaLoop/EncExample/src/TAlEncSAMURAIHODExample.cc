@@ -164,9 +164,9 @@ bool TAlEncSAMURAIHODExample::Calculate()
       fAnaLoop->Add(SAMURAIHOD, TUCal,   id, pla->GetTimeU());
       fAnaLoop->Add(SAMURAIHOD, TDCal,   id, pla->GetTimeD());
       fAnaLoop->Add(SAMURAIHOD, TAveCal, id, pla->GetTime());
-      fAnaLoop->Add(SAMURAIHOD, TUSlw,   id, pla->GetTimeSlew());
-      fAnaLoop->Add(SAMURAIHOD, TDSlw,   id, pla->GetTimeUSlew());
-      fAnaLoop->Add(SAMURAIHOD, TAveSlw, id, pla->GetTimeDSlew());
+      fAnaLoop->Add(SAMURAIHOD, TUSlw,   id, pla->GetTimeUSlew());
+      fAnaLoop->Add(SAMURAIHOD, TDSlw,   id, pla->GetTimeDSlew());
+      fAnaLoop->Add(SAMURAIHOD, TAveSlw, id, pla->GetTimeSlew());
       fAnaLoop->Add(SAMURAIHOD, DTRaw,   id, dtraw);
       fAnaLoop->Add(SAMURAIHOD, DTCal,   id, dtcal);
       fAnaLoop->Add(SAMURAIHOD, DTSlw,   id, dtslw);
