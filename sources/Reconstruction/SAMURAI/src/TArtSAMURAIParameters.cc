@@ -202,7 +202,7 @@ Bool_t TArtSAMURAIParameters::LoadParameter(const char *xmlfile)
 Bool_t TArtSAMURAIParameters::LoadNeuLANDTCal(const char *csvfile)
 {
   TArtCore::Info(__FILE__,"Load NeuLAND tcal from %s", csvfile);
-  ifstream file(csvfile);
+  std::ifstream file(csvfile);
   if (!file) {
     std::cerr << csvfile << ": Could not open." << std::endl;
     return false;

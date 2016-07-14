@@ -8,7 +8,7 @@ void RIDF2DataId(){
   TArtRawEventObject *rawevent = estore->GetRawEventObject();
 
   TFile *fout = new TFile("dataid.root","RECREATE");
-  TNtuple *ntp = new TNtuple("ntp","ntp","sys:cat:det:dtype:val");
+  TNtuple *ntp = new TNtuple("ntp","ntp","sys:val");
 
   int neve = 0;
   while(estore->GetNextEvent() && neve < 10000){
@@ -29,7 +29,7 @@ void RIDF2DataId(){
 	int det = d->GetDetectorID(); 
 	int id = d->GetDatatypeID(); 
 
-	ntp->Fill((float)detector,(float)cat,(float)det,(float)id,(float)val);
+	ntp->Fill((float)detector,(float)val);
       }
     }
 

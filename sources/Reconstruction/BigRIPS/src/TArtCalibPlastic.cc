@@ -59,7 +59,7 @@ void TArtCalibPlastic::LoadData()   {
   for(Int_t i=0;i<fEvent->GetNumSeg();i++){
     TArtRawSegmentObject *seg = fEvent->GetSegment(i);
     Int_t detector = seg->GetDetector();
-    if(PLAT == detector || STOPPLA == detector || RF == detector || PLAQ == detector) LoadData(seg); // STOPPLA is CFD TDC for 2014 Uranium campaign, TI
+    if(PLAT == detector /*|| STOPPLA == detector*/ || RF == detector || PLAQ == detector) LoadData(seg); // STOPPLA is CFD TDC for 2014 Uranium campaign, TI
   }
   return;
 
@@ -71,7 +71,7 @@ void TArtCalibPlastic::LoadData(TArtRawSegmentObject *seg)   {
   Int_t device   = seg->GetDevice();
   Int_t fpl      = seg->GetFP();
   Int_t detector = seg->GetDetector();
-  if(!(PLAT == detector || STOPPLA == detector || RF == detector || PLAQ == detector)) return;  // STOPPLA is CFD TDC for 2014 Uranium campaign, TI
+  if(!(PLAT == detector /*|| STOPPLA == detector*/ || RF == detector || PLAQ == detector)) return;  // STOPPLA is CFD TDC for 2014 Uranium campaign, TI
   for(Int_t j=0;j<seg->GetNumData();j++){
     TArtRawDataObject *d = seg->GetData(j);
     Int_t geo = d->GetGeo(); 
@@ -108,7 +108,7 @@ void TArtCalibPlastic::LoadData(TArtRawSegmentObject *seg)   {
 	if(pla->GetQRRaw()<=0)pla->SetQRRaw(val);
       }
     }
-    if(PLAT == detector || STOPPLA == detector || RF == detector ){
+    if(PLAT == detector /*|| STOPPLA == detector*/ || RF == detector ){
       if(mm==*((TArtRIDFMap *)para->GetTLMap())){
 	if(pla->GetTLRaw()<=0){ 
 	  pla->SetTLRaw(val);
